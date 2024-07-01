@@ -3,7 +3,8 @@ pipeline {
 
     environment {
         AWS_REGION = 'us-east-1' // Set your AWS region
-        ECR_REPO_NAME = 'mishika' // Set your ECR repository name
+        AWS_ACCOUNT_ID = '905418473125' // Replace with your AWS account ID
+        ECR_REPO_NAME = 'myapp' // Set your ECR repository name
         IMAGE_TAG = 'latest' // Set the tag you want to use for your image
     }
 
@@ -21,7 +22,7 @@ pipeline {
                 script {
                     // Authenticate Docker to the ECR registry
                     sh '''
-                        aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin <account-id>.dkr.ecr.$AWS_REGION.amazonaws.com
+                        aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
                     '''
                 }
             }
@@ -31,7 +32,7 @@ pipeline {
             steps {
                 script {
                     sh '''
-                        docker tag my-docker-image:latest <account-id>.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO_NAME:$IMAGE_TAG
+                        docker tag my-docker-image:latest ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${IMAGE_TAG}
                     '''
                 }
             }
@@ -41,10 +42,19 @@ pipeline {
             steps {
                 script {
                     sh '''
-                        docker push <account-id>.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO_NAME:$IMAGE_TAG
+                        docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${IMAGE_TAG}
                     '''
                 }
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'Docker image built and pushed successfully!'
+        }
+        failure {
+            echo 'Failed to build or push Docker image.'
         }
     }
 }
