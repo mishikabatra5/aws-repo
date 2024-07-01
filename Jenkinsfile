@@ -4,10 +4,10 @@ pipeline {
     }
 
     environment {
-        AWS_REGION = 'us-east-1' // Set your AWS region
-        AWS_ACCOUNT_ID = '905418473125' // Replace with your AWS account ID
-        ECR_REPO_NAME = 'mishika' // Set your ECR repository name
-        IMAGE_TAG = 'latest' // Set the tag you want to use for your image
+        AWS_REGION = 'us-east-1' 
+        AWS_ACCOUNT_ID = '905418473125'
+        ECR_REPO_NAME = 'mishika' 
+        IMAGE_TAG = 'latest' 
     }
 
     stages {
