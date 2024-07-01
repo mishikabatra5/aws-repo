@@ -1,10 +1,12 @@
 pipeline {
-    agent any
+    agent {
+        label 'docker'
+    }
 
     environment {
         AWS_REGION = 'us-east-1' // Set your AWS region
         AWS_ACCOUNT_ID = '905418473125' // Replace with your AWS account ID
-        ECR_REPO_NAME = 'myapp' // Set your ECR repository name
+        ECR_REPO_NAME = 'mishika' // Set your ECR repository name
         IMAGE_TAG = 'latest' // Set the tag you want to use for your image
     }
 
@@ -12,7 +14,10 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build('my-docker-image', '-f Dockerfile .')
+                    // Change to a directory within /home
+                    dir('/home/jenkins/workspace/aws-pipeline') {
+                        docker.build('my-docker-image', '-f Dockerfile .')
+                    }
                 }
             }
         }
