@@ -13,7 +13,7 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git 'https://github.com/mishikabatra5/aws-repo.git'
+                git branch: 'main', url: 'https://github.com/mishikabatra5/aws-repo.git'
             }
         }
 
