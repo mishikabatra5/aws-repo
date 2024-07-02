@@ -20,7 +20,10 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build("${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}")
+                    // Ensure Docker can access necessary directories
+                    withEnv(['DOCKER_HOME=/home/jenkins/docker-data']) {
+                        sh 'docker build -t ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG} .'
+                    }
                 }
             }
         }
