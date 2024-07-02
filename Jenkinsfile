@@ -17,16 +17,16 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    // Ensure Docker can access necessary directories
-                    withEnv(['DOCKER_HOME=/home/jenkins/docker-data']) {
-                        sh 'docker build -t ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG} .'
-                    }
-                }
+       stage('Build Docker Image') {
+    steps {
+        script {
+            withEnv(['DOCKER_HOME=/home/jenkins/docker-data']) {
+                sh 'docker build -t 905418473125.dkr.ecr.us-east-1.amazonaws.com/mishika/mishika:${env.BUILD_ID} .'
             }
         }
+    }
+}
+
 
         stage('Assume Role with OIDC') {
             steps {
