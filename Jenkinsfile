@@ -1,55 +1,30 @@
 pipeline {
     agent any
-
+    
     environment {
-        ECR_REGISTRY = '905418473125.dkr.ecr.us-east-1.amazonaws.com/mishika'
-        ECR_REPOSITORY = 'mishika'
-        IMAGE_TAG = "${env.BUILD_ID}"
-        AWS_ROLE_ARN = 'arn:aws:iam::905418473125:role/ecr_docker_image'
-        OIDC_PROVIDER_URL = 'https://token.actions.githubusercontent.com'
-        OIDC_AUDIENCE = 'https://github.com/mishikabatra5/aws-repo.git'
+        AWS_DEFAULT_REGION = 'us-east-1'
+        ECR_REPO = 'mishika'
+        URL_REGISTRY = '905418473125.dkr.ecr.us-east-1.amazonaws.com' // Replace with your ECR registry URL
     }
 
     stages {
-        stage('Clone Repository') {
+        stage('Build and Push Docker Image') {
             steps {
-                git branch: 'main', url: 'https://github.com/mishikabatra5/aws-repo.git'
-            }
-        }
+                script {
+                    // Authenticate using IAM role attached to the instance
+                    sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${URL_REGISTRY}"
 
-       stage('Build Docker Image') {
-    steps {
-        script {
-            withEnv(['DOCKER_HOME=/home/jenkins/docker-data']) {
-                sh 'docker build -t 905418473125.dkr.ecr.us-east-1.amazonaws.com/mishika/mishika:${env.BUILD_ID} .'
+                    // Build Docker image
+                    sh "docker build -t $ECR_REPO ."
+
+                    // Tag Docker image
+                    sh "docker tag $ECR_REPO:latest ${URL_REGISTRY}/$ECR_REPO:latest"
+
+                    // Push Docker image to ECR
+                    sh "docker push ${URL_REGISTRY}/$ECR_REPO:latest"
+                }
             }
         }
     }
 }
 
-
-        stage('Assume Role with OIDC') {
-            steps {
-                withAWS(role: "${AWS_ROLE_ARN}", roleSessionName: 'JenkinsSession', region: 'your-region') {
-                    sh 'aws ecr get-login-password --region your-region | docker login --username AWS --password-stdin ${ECR_REGISTRY}'
-                }
-            }
-        }
-
-        stage('Push Docker Image to ECR') {
-            steps {
-                script {
-                    docker.image("${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}").push()
-                }
-            }
-        }
-
-        stage('Cleanup') {
-            steps {
-                script {
-                    sh "docker rmi ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
-                }
-            }
-        }
-    }
-}
